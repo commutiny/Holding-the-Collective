@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Holding the Collective</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;0,700;1,500&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:root{
+  --paper:#F4F6FA;
+  --paper-raised:#FFFFFF;
+  --ink:#182235;
+  --ink-secondary:#46516B;
+  --ink-muted:#8894AC;
+  --border:#DDE3EE;
+  --border-strong:#C3CCDD;
+  --accent:#2C74A8;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#E4EEF8;
+  --track:#E7EBF3;
+  --shadow:0 1px 2px rgba(24,34,53,0.05), 0 10px 28px rgba(24,34,53,0.07);
+  --bad:#B14A4A;
+  --d0:#E2A33B; /* Swimming Pool */
+  --d1:#4E9B8F; /* Lake / Lagoon */
+  --d2:#2C74A8; /* Open Ocean */
+  --d3:#1F3F73; /* Challenger Deep */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111621;
+    --paper-raised:#191F2E;
+    --ink:#E9EDF6;
+    --ink-secondary:#AEB8CE;
+    --ink-muted:#717DA0;
+    --border:#2A3245;
+    --border-strong:#394258;
+    --accent:#6FA8D8;
+    --accent-ink:#0E1420;
+    --accent-soft:#1E2C40;
+    --track:#232B3D;
+    --shadow:0 1px 2px rgba(0,0,0,0.35), 0 12px 28px rgba(0,0,0,0.4);
+    --bad:#DB7373;
+    --d0:#E6B15A; --d1:#63B0A3; --d2:#5B9BD4; --d3:#7C9AD9;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111621; --paper-raised:#191F2E; --ink:#E9EDF6; --ink-secondary:#AEB8CE;
+  --ink-muted:#717DA0; --border:#2A3245; --border-strong:#394258;
+  --accent:#6FA8D8; --accent-ink:#0E1420; --accent-soft:#1E2C40; --track:#232B3D;
+  --shadow:0 1px 2px rgba(0,0,0,0.35), 0 12px 28px rgba(0,0,0,0.4); --bad:#DB7373;
+  --d0:#E6B15A; --d1:#63B0A3; --d2:#5B9BD4; --d3:#7C9AD9;
+}
+
+*{box-sizing:border-box;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:'Work Sans',system-ui,sans-serif; -webkit-font-smoothing:antialiased;}
+.app{max-width:920px; margin:0 auto; padding:40px 24px 90px;}
+
+header{margin-bottom:26px;}
+.eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:600; margin-bottom:10px;}
+h1{font-family:'Spectral',serif; font-weight:600; font-style:italic; font-size:clamp(26px,4vw,36px); line-height:1.15; margin:0 0 12px; text-wrap:balance; letter-spacing:-.01em;}
+.who{color:var(--ink-secondary); font-size:14px; margin:0 0 12px;}
+.who b{color:var(--ink); font-weight:600;}
+.sub{color:var(--ink-secondary); font-size:14.5px; line-height:1.6; max-width:66ch; margin:0 0 8px;}
+.attribution{color:var(--ink-muted); font-size:12.5px; font-style:italic; margin:0 0 20px;}
+
+.tabs{display:flex; gap:6px; border-bottom:1px solid var(--border);}
+.tab{appearance:none; border:none; background:none; cursor:pointer; font-family:inherit; font-size:14.5px; font-weight:600; color:var(--ink-muted); padding:10px 4px; margin-right:22px; border-bottom:2px solid transparent; display:flex; align-items:center; gap:8px;}
+.tab.active{color:var(--ink); border-bottom-color:var(--accent);}
+.badge{font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; background:var(--accent-soft); color:var(--accent); border-radius:20px; padding:2px 8px; font-variant-numeric:tabular-nums;}
+
+.panel{display:none;}
+.panel.active{display:block;}
+
+.legend-row{display:flex; flex-wrap:wrap; gap:16px; margin:20px 0;}
+.legend-card{
+  flex:1; min-width:150px; background:var(--paper-raised); border:1px solid var(--border);
+  border-radius:12px; padding:14px 16px; box-shadow:var(--shadow);
+}
+.legend-swatch{width:12px; height:12px; border-radius:3px; display:inline-block; margin-right:8px;}
+.legend-title{font-weight:600; font-size:13.5px;}
+.legend-desc{color:var(--ink-muted); font-size:12px; margin-top:5px; line-height:1.5;}
+
+.banner{background:var(--accent-soft); color:var(--accent); border-radius:10px; padding:12px 16px; font-size:13.5px; margin:18px 0; line-height:1.5;}
+.banner.error{background:rgba(177,74,74,0.12); color:var(--bad);}
+
+.field-row{display:flex; gap:14px; margin:22px 0 6px; flex-wrap:wrap;}
+.field{flex:1; min-width:160px;}
+label.small{display:block; font-size:12.5px; font-weight:600; color:var(--ink-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:.03em;}
+input[type="text"], input[type="date"], textarea{
+  width:100%; font-family:inherit; font-size:14.5px; color:var(--ink); background:var(--paper-raised);
+  border:1px solid var(--border-strong); border-radius:8px; padding:10px 12px; outline:none;
+}
+input:focus, textarea:focus{border-color:var(--accent);}
+textarea{resize:vertical; min-height:44px;}
+
+.cluster{margin:32px 0 8px;}
+.cluster-head{margin-bottom:6px;}
+.cluster-label{font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700; letter-spacing:.12em; color:var(--accent);}
+.cluster-question{font-family:'Spectral',serif; font-style:italic; font-size:18px; margin:4px 0 0; text-wrap:balance;}
+
+.cap-card{background:var(--paper-raised); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin:16px 0; box-shadow:var(--shadow);}
+.cap-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.cap-code{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-muted); letter-spacing:.05em;}
+.cap-title{font-family:'Spectral',serif; font-weight:600; font-size:19px; margin:2px 0 6px;}
+.cap-depth-badge{font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; white-space:nowrap;}
+.cap-desc{color:var(--ink-muted); font-size:13.5px; margin:0 0 16px; line-height:1.5;}
+
+.level{padding:14px 0; border-top:1px solid var(--border);}
+.level:first-of-type{border-top:none;}
+.level.locked{opacity:.5;}
+.level-label{font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; display:flex; align-items:center; gap:7px;}
+.level-dot{width:8px; height:8px; border-radius:50%; display:inline-block;}
+.level-text{font-size:14px; line-height:1.55; margin-bottom:10px;}
+.yn-row{display:flex; gap:8px; align-items:center;}
+.yn-btn{
+  appearance:none; border:1px solid var(--border-strong); background:var(--paper); color:var(--ink-secondary);
+  font-family:inherit; font-weight:600; font-size:13px; padding:7px 18px; border-radius:7px; cursor:pointer;
+}
+.yn-btn.selected-yes{background:var(--d1); border-color:var(--d1); color:#fff;}
+.yn-btn.selected-no{background:var(--ink-muted); border-color:var(--ink-muted); color:#fff;}
+.yn-btn:disabled{cursor:not-allowed;}
+.lock-note{font-size:12px; color:var(--ink-muted); margin-top:4px; font-style:italic;}
+.why-wrap{margin-top:10px; max-width:520px;}
+.why-wrap input{font-size:13.5px; padding:8px 11px;}
+
+.swim-track{display:flex; align-items:center; gap:2px; margin-top:6px;}
+.swim-seg{flex:1; height:6px; border-radius:3px; background:var(--track);}
+.swim-seg.on{background:var(--seg-color, var(--d2));}
+.swim-name{font-size:13.5px; font-weight:600; min-width:170px;}
+.swim-row{display:flex; align-items:center; gap:14px; padding:9px 0; border-top:1px solid var(--border);}
+.swim-row:first-child{border-top:none;}
+.swim-current{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-muted); min-width:96px; text-align:right;}
+
+.stat-row{display:flex; gap:14px; margin:20px 0; flex-wrap:wrap;}
+.stat-tile{background:var(--paper-raised); border:1px solid var(--border); border-radius:14px; padding:18px 22px; box-shadow:var(--shadow); flex:1; min-width:160px;}
+.stat-value{font-family:'IBM Plex Mono',monospace; font-size:26px; font-weight:600; font-variant-numeric:tabular-nums;}
+.stat-label{color:var(--ink-muted); font-size:12px; margin-top:2px; text-transform:uppercase; letter-spacing:.03em;}
+
+.section-title{font-family:'Spectral',serif; font-weight:600; font-size:18px; margin:30px 0 6px;}
+.section-note{color:var(--ink-muted); font-size:13px; margin:0 0 14px;}
+
+.stack-card{background:var(--paper-raised); border:1px solid var(--border); border-radius:12px; padding:14px 18px; margin:10px 0; box-shadow:var(--shadow);}
+.stack-top{display:flex; justify-content:space-between; font-size:13.5px; font-weight:600; margin-bottom:8px;}
+.stack-top .n{color:var(--ink-muted); font-weight:500; font-family:'IBM Plex Mono',monospace; font-size:12px;}
+.stack-bar{display:flex; height:14px; border-radius:7px; overflow:hidden; background:var(--track);}
+.stack-seg{height:100%;}
+
+.people-list{display:flex; flex-direction:column; gap:8px;}
+.person-card{display:flex; justify-content:space-between; align-items:center; background:var(--paper-raised); border:1px solid var(--border); border-radius:10px; padding:11px 15px; box-shadow:var(--shadow);}
+.person-who{font-size:13.5px; font-weight:600;}
+.person-team{color:var(--ink-muted); font-weight:500; font-size:12.5px;}
+.person-depth{font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:600; padding:3px 10px; border-radius:20px;}
+.empty-note{color:var(--ink-muted); font-size:13.5px; padding:20px 0;}
+
+.actions-row{display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:24px;}
+button.primary{appearance:none; border:none; cursor:pointer; font-family:inherit; background:var(--accent); color:var(--accent-ink); font-weight:600; font-size:14.5px; padding:13px 24px; border-radius:9px; box-shadow:var(--shadow);}
+button.primary:disabled{opacity:.55; cursor:default;}
+button.secondary{appearance:none; border:1px solid var(--border-strong); background:var(--paper-raised); color:var(--ink); font-family:inherit; font-weight:600; font-size:13.5px; padding:11px 18px; border-radius:8px; cursor:pointer;}
+button.ghost{appearance:none; border:none; background:none; color:var(--ink-muted); font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer; text-decoration:underline;}
+
+@media print{
+  .tabs, .actions-row, #groupBtnRow, .banner{display:none !important;}
+  .panel{display:block !important;}
+  body{background:#fff;}
+}
+@media (max-width:560px){
+  .swim-name{min-width:120px; font-size:12.5px;}
+  .swim-current{min-width:78px; font-size:10.5px;}
+}
+</style>
+</head>
+<body>
+
+
+<div class="app">
+  <header>
+    <div class="eyebrow">Self-assessment · Eleven capacities, four depths</div>
+    <h1>Holding the Collective</h1>
+    <p class="who">Who this is for: <b>people doing collectivising work</b> — holding space where a lot of different people, interests and views need to move together.</p>
+    <p class="sub">For each capacity, work through the levels in order, shallowest first. Answer Yes only if you usually, mostly, or always show that behaviour — not just once. The moment you can't honestly say Yes, stop there: that's your depth for now, not a mark against you. Add a line on why for each level you answer.</p>
+    <p class="attribution">Capacity language draws on Vyaktitva's framework of adaptive, inside-out leadership.</p>
+    <div class="tabs">
+      <button class="tab active" data-tab="assess">Take the assessment</button>
+      <button class="tab" data-tab="group">Group results <span class="badge" id="countBadge">0</span></button>
+    </div>
+  </header>
+
+  <section id="assess" class="panel active">
+    <div class="legend-row">
+      <div class="legend-card"><span class="legend-swatch" style="background:var(--d0)"></span><span class="legend-title">Swimming Pool</span><div class="legend-desc">Shallow end. You can do this in a safe, structured setting — familiar people, low stakes, a script to follow.</div></div>
+      <div class="legend-card"><span class="legend-swatch" style="background:var(--d1)"></span><span class="legend-title">Lake / Lagoon</span><div class="legend-desc">Calmer open water. You carry it into everyday situations, though conditions are still fairly forgiving.</div></div>
+      <div class="legend-card"><span class="legend-swatch" style="background:var(--d2)"></span><span class="legend-title">Open Ocean</span><div class="legend-desc">You hold it steady in real, changing, high-stakes situations — no script, and it still works.</div></div>
+      <div class="legend-card"><span class="legend-swatch" style="background:var(--d3)"></span><span class="legend-title">Challenger Deep</span><div class="legend-desc">Even under maximum pressure, when it would be easiest to protect yourself — this is where you go on instinct.</div></div>
+    </div>
+
+    <div class="field-row">
+      <div class="field"><label class="small" for="fName">Your name</label><input type="text" id="fName" maxlength="60"></div>
+      <div class="field"><label class="small" for="fTeam">Group / role</label><input type="text" id="fTeam" maxlength="60"></div>
+      <div class="field"><label class="small" for="fDate">Date</label><input type="date" id="fDate"></div>
+    </div>
+
+    <div id="capacities"></div>
+
+    <div class="section-title">Where you're swimming</div>
+    <p class="section-note">Each marker shows depth from Swimming Pool (left) to Challenger Deep (right).</p>
+    <div class="stat-row">
+      <div class="stat-tile"><div class="stat-value" id="overallLabel">—</div><div class="stat-label">Overall</div></div>
+    </div>
+    <div id="swimList"></div>
+
+    <div id="dbBanner" class="banner" hidden></div>
+    <div class="actions-row" id="groupBtnRow">
+      <button class="primary" id="submitGroupBtn">Share to group results</button>
+      <span class="section-note" id="submitMsg" style="margin:0;"></span>
+    </div>
+    <div class="actions-row">
+      <button class="secondary" id="printBtn">Print / Save as PDF</button>
+      <button class="ghost" id="clearBtn">Clear all answers</button>
+    </div>
+    <p class="section-note" style="margin-top:18px;">Your answers save as a private draft in this browser only. Nothing leaves your device unless you tap "Share to group results" — that sends just your computed depth per capacity, never your written reasons, into the shared view below.</p>
+  </section>
+
+  <section id="group" class="panel">
+    <div class="stat-row">
+      <div class="stat-tile"><div class="stat-value" id="totalCount">0</div><div class="stat-label">Participants</div></div>
+      <div class="stat-tile"><div class="stat-value" id="collectiveLabel">—</div><div class="stat-label">Collective depth</div></div>
+    </div>
+
+    <div class="legend-row" id="groupLegend"></div>
+
+    <div class="section-title">By capacity</div>
+    <p class="section-note">Share of participants who reached each depth, per capacity.</p>
+    <div id="capStacks"></div>
+
+    <div class="section-title">Participants</div>
+    <div class="people-list" id="peopleList"></div>
+  </section>
+</div>
+
+<script>
+const DEPTHS = [
+  { id:'sp', label:'Swimming Pool', color:'var(--d0)' },
+  { id:'ll', label:'Lake / Lagoon', color:'var(--d1)' },
+  { id:'oo', label:'Open Ocean', color:'var(--d2)' },
+  { id:'cd', label:'Challenger Deep', color:'var(--d3)' }
+];
+
+const CLUSTERS = [
+  { id:'seeing', label:'SEEING', question:"How clearly do I see what this space needs — and prepare and speak into it?" },
+  { id:'being', label:'BEING', question:"How do I show up in relationship with a room full of difference?" },
+  { id:'doing', label:'DOING', question:"How do I turn what the collective needs into action?" }
+];
+
+const CAPACITIES = [
+  { code:'01', id:'purposive-discussion', cluster:'seeing', name:'Purposive Discussion', desc:"Leading conversations among diverse people that leave the group with clarity, ownership and a next step.",
+    levels:[
+      "In a structured meeting with a clear agenda, I can help the group land on next steps. (e.g., summarising action items at the end of a scheduled coalition meeting.)",
+      "In everyday conversations across the collective, I steer discussion toward clarity and ownership rather than letting it drift. (e.g., asking 'so who's doing what by when' before an informal huddle ends.)",
+      "However scattered or divided the group is, in a real, high-stakes discussion I can lead people to real alignment and ownership. (e.g., getting members with conflicting agendas to commit to one shared plan after a heated debate.)",
+      "Even under real pressure, leading a room to clarity and action is my instinct — I don't let ambiguity sit even in a crisis. (e.g., forcing a clear collective decision out of a chaotic emergency meeting.)"
+    ]},
+  { code:'02', id:'preciseness', cluster:'seeing', name:'Preciseness', desc:"Saying what needs to be said, briefly and clearly, so the collective's thinking and decisions move faster.",
+    levels:[
+      "When I prepare in advance, I can communicate a point briefly and clearly to the group. (e.g., writing a tight one-paragraph summary before a coalition call.)",
+      "In everyday exchanges across the collective, I default to saying things simply and directly rather than padding or hedging. (e.g., answering a partner organisation's question in two sentences instead of ten.)",
+      "Under time pressure or in a complex, high-stakes discussion with many voices, I can still distil what matters into something the group can act on immediately. (e.g., giving a one-line decision during a fast-moving crisis call with multiple stakeholders.)",
+      "Even when the stakes and emotions across a diverse room are highest, precision is instinctive for me. (e.g., giving a clear, brief instruction mid-emergency without over-explaining, even as different factions talk over each other.)"
+    ]},
+  { code:'03', id:'premeditation', cluster:'seeing', name:'Premeditation', desc:"Looking around the corner — thinking through how a decision will land across different, sometimes competing, interests before you act.",
+    levels:[
+      "I can think through the next step of a decision when someone asks me to. (e.g., listing one likely consequence for one partner organisation when prompted.)",
+      "In everyday decisions, I routinely think a step or two ahead about how it will land with different parts of the collective, without being asked. (e.g., checking how a decision will land with a quieter member group before sending it.)",
+      "For a complex, high-stakes decision, I can map out how it ripples across the collective's different interests and choose intentionally, even under time pressure. (e.g., war-gaming how a policy change lands with each stakeholder group before committing.)",
+      "Even under real pressure, thinking several moves ahead across a diverse set of interests before acting is instinctive for me — I don't just react. (e.g., anticipating how an emergency decision will land with every faction even as I'm making it.)"
+    ]},
+  { code:'04', id:'preparedness', cluster:'seeing', name:'Preparedness', desc:"Preparing deeply enough that you can stay calm, confident and agile when a diverse room throws up the unexpected.",
+    levels:[
+      "I prepare when I know in advance exactly what's coming. (e.g., rehearsing how I'll open a session the night before.)",
+      "In everyday work, I build in buffers and think through what could go wrong before it happens, without being asked to. (e.g., pre-drafting a fallback plan for a routine gathering.)",
+      "For a complex, high-stakes convening, I prepare deeply enough that I stay calm and agile even when things go sideways. (e.g., having contingencies ready that let me pivot fast when a session goes off-script.)",
+      "Even facing a genuine crisis in the room, the depth of my preparation is what lets me stay calm and confident. (e.g., responding smoothly to a walkout because I'd quietly mapped the tensions weeks before.)"
+    ]},
+  { code:'05', id:'partnership-of-feelings', cluster:'being', name:'Partnership of Feelings', desc:"Bringing feeling and reason together — naming what you sense in the room, not only what the agenda says — to build trust and make wiser calls.",
+    levels:[
+      "I can name my feelings when someone directly asks me how I'm doing. (e.g., saying 'I'm frustrated' when a mentor checks in.)",
+      "In everyday work, I bring my own feelings and notice others' into the conversation, rather than keeping decisions purely logical. (e.g., naming that a plan feels rushed, not just listing the risks.)",
+      "In a high-stakes or emotionally charged decision involving many different people, I can draw on feeling and reason together to reach a wiser call. (e.g., weighing a coalition's anxiety alongside the data before a big call.)",
+      "Even under real pressure, I trust and use feeling as data, folding it into decisions instinctively rather than suppressing it. (e.g., naming my own fear in a tense collective meeting because it's relevant to the decision.)"
+    ]},
+  { code:'06', id:'positive-pressure', cluster:'being', name:'Positive Pressure', desc:"Raising the bar on ownership and accountability across the collective without leaning on fear or hierarchy to get there.",
+    levels:[
+      "I can hold someone to a standard when there's a clear structure or process backing me up. (e.g., following a checklist to give feedback in a scheduled review.)",
+      "In everyday work, I set high expectations and follow up on them directly, without needing a formal process to lean on. (e.g., asking a partner for a better draft, plainly and without harshness.)",
+      "In a high-stakes situation where a member of the collective is falling short, I can hold the standard firmly while keeping them motivated rather than afraid. (e.g., confronting a missed deadline on a critical deliverable without shaming the person or organisation.)",
+      "Even under real pressure, inspiring accountability without fear is instinctive for me — I don't default to threat or hierarchy when the stakes rise. (e.g., holding a diverse coalition to a hard deadline during a crisis while keeping trust intact.)"
+    ]},
+  { code:'07', id:'pluralistic-stories', cluster:'being', name:'Pluralistic Stories (Plutories)', desc:"Holding several different, even conflicting, stories and truths in the room at once, without rushing to collapse them into one official version.",
+    levels:[
+      "When it's pointed out to me, I can acknowledge that another person's account of what happened is also true, even if it differs from mine. (e.g., agreeing that a partner experienced a meeting differently than I did, once they name it.)",
+      "In everyday work, I actively invite different accounts of the same event rather than assuming one version is the correct one. (e.g., asking two members what a decision looked like from where they stood.)",
+      "In a complex, high-stakes situation with real disagreement, I can hold multiple competing stories in the room at once without rushing the group to a single narrative. (e.g., letting two factions' differing accounts of a conflict both stay on the table while the collective decides what to do next.)",
+      "Even under real pressure to produce one tidy story, holding plurality is instinctive for me — I don't collapse difference just to make the room comfortable. (e.g., naming that three contradictory accounts of a crisis are all worth holding, even as people demand a single answer.)"
+    ]},
+  { code:'08', id:'plasticity', cluster:'doing', name:'Plasticity', desc:"Continuously adapting, learning and reshaping how you work as the collective and its context change.",
+    levels:[
+      "I can change my approach when someone explicitly points out that it isn't working. (e.g., trying a new method after direct feedback from a partner.)",
+      "In everyday work, I notice when conditions across the collective have shifted and adjust my own approach without being told to. (e.g., changing my plan mid-week once new information comes in from a member group.)",
+      "In a complex, high-stakes situation, I can reshape my whole approach — not just a tactic — when reality genuinely changes. (e.g., abandoning a convening strategy I'd invested months in once the coalition's needs clearly shifted.)",
+      "Even under real pressure, reshaping myself in response to changing reality is instinctive — I don't cling to what used to work. (e.g., changing my whole plan mid-crisis the moment the collective's situation demands it.)"
+    ]},
+  { code:'09', id:'pushing-envelope', cluster:'doing', name:'Pushing the Envelope', desc:"Questioning assumptions and stretching what the collective believes is possible, in service of real growth.",
+    levels:[
+      "I can question an assumption when explicitly asked to play devil's advocate. (e.g., raising an alternative view when asked in a workshop.)",
+      "In everyday work, I regularly challenge the way things are done across the collective and suggest stretch options, without being prompted. (e.g., proposing a bolder shared target in a routine planning meeting.)",
+      "On a complex, high-stakes piece of work, I can push a diverse group past its comfort zone and hold that stretch even when it's uncomfortable. (e.g., insisting on a harder but better solution mid-project, despite resistance from several members.)",
+      "Even under real pressure, pushing for the bigger, better possibility is instinctive, not something I hold back on because it's risky. (e.g., proposing a genuinely new approach during a crisis instead of just reverting to what's safe.)"
+    ]},
+  { code:'10', id:'white-spaces', cluster:'doing', name:'Picking Up the White Spaces', desc:"Noticing what's missing, neglected or falling between the cracks in the collective's work, and stepping in.",
+    levels:[
+      "When it's pointed out to me, I'm willing to pick up a specific task that's fallen through the cracks. (e.g., taking on a follow-up email nobody else sent, once someone flags it.)",
+      "In everyday work, I notice gaps in the collective's work myself and step in or flag them, without being asked. (e.g., catching that no one owns the venue booking and raising it before it becomes urgent.)",
+      "In a complex, high-stakes situation, I notice structural gaps — not just tasks — that no one else is seeing, and act on them even without a clear mandate. (e.g., realising a whole stakeholder group has been left out of a major decision and bringing them in myself.)",
+      "Even under real pressure, noticing and picking up what's missing is instinctive for me — I don't wait for permission or assignment. (e.g., stepping into a leadership gap mid-crisis because no one else has, even though it isn't formally my role.)"
+    ]},
+  { code:'11', id:'passion-to-action', cluster:'doing', name:'Passion to Action', desc:"Turning your own energy and conviction for this work into concrete next steps for the collective, rather than letting it stay talk or feeling.",
+    levels:[
+      "When asked what I'd like to see happen, I can turn my enthusiasm for an idea into one concrete next step. (e.g., agreeing to draft a one-pager after a discussion I felt strongly about.)",
+      "In everyday work, I turn my own conviction into action without being asked — proposing next steps, not just opinions. (e.g., volunteering to pilot an idea I care about instead of waiting for someone else to.)",
+      "In a complex, high-stakes moment, I can channel real passion — mine or the room's — into concrete, collective action rather than letting it dissipate into talk. (e.g., converting a heated, energised debate into a committed pilot before the momentum fades.)",
+      "Even under real pressure, turning conviction into action is instinctive for me — I don't let urgency or emotion stay stuck as talk. (e.g., mobilising the collective into concrete steps in the middle of a crisis, powered by shared passion rather than paralysed by it.)"
+    ]}
+];
+
+// Paste the "Web app URL" you get after deploying the Apps Script (ends in /exec).
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx55a1iht_rmNKVRJOxSaNkLvIaDVBfd-YhXtezZO3AmQOkTheASBtqhjRkCvH5mFzp2Q/exec';
+
+const STORE_KEY = 'holding-collective-gauge-draft-v1';
+const ID_KEY = 'holding-collective-gauge-participant-id';
+let state = { answers:{}, name:'', team:'', date:'' };
+CAPACITIES.forEach(c => { state.answers[c.id] = [null,null,null,null]; });
+
+function loadDraft(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw){ const parsed = JSON.parse(raw); if (parsed && parsed.answers) state = parsed; }
+  }catch(e){}
+}
+function saveDraft(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+function getParticipantId(){
+  try{
+    let id = localStorage.getItem(ID_KEY);
+    if (!id){ id = 'p_' + Math.random().toString(36).slice(2,11) + Date.now().toString(36); localStorage.setItem(ID_KEY, id); }
+    return id;
+  }catch(e){ return 'p_' + Math.random().toString(36).slice(2,11); }
+}
+
+function currentDepthIndex(capId){
+  const ans = state.answers[capId];
+  let depth = -1;
+  for (let i=0;i<4;i++){ if (ans[i] && ans[i].yes === true) depth = i; else break; }
+  return depth;
+}
+function depthLabelFor(idx){ return idx<0 ? 'Not yet in the pool' : DEPTHS[idx].label; }
+function depthColorFor(idx){ return idx<0 ? 'var(--track)' : DEPTHS[idx].color; }
+function isUnlocked(capId, levelIdx){
+  if (levelIdx===0) return true;
+  const prev = state.answers[capId][levelIdx-1];
+  return !!(prev && prev.yes === true);
+}
+
+function renderCapacities(){
+  const wrap = document.getElementById('capacities');
+  wrap.innerHTML = '';
+  CLUSTERS.forEach(cluster=>{
+    const sec = document.createElement('div');
+    sec.className = 'cluster';
+    const head = document.createElement('div');
+    head.className = 'cluster-head';
+    head.innerHTML = '<div class="cluster-label">'+cluster.label+'</div><div class="cluster-question">'+cluster.question+'</div>';
+    sec.appendChild(head);
+    wrap.appendChild(sec);
+
+    CAPACITIES.filter(c=>c.cluster===cluster.id).forEach(cap=>{
+      const card = document.createElement('div');
+      card.className = 'cap-card';
+      card.id = 'card-'+cap.id;
+
+      const head2 = document.createElement('div');
+      head2.className = 'cap-head';
+      const left = document.createElement('div');
+      left.innerHTML = '<div class="cap-code">'+cap.code+'</div><div class="cap-title">'+cap.name+'</div>';
+      const badge = document.createElement('div');
+      badge.className = 'cap-depth-badge';
+      badge.id = 'badge-'+cap.id;
+      head2.appendChild(left);
+      head2.appendChild(badge);
+      card.appendChild(head2);
+
+      const desc = document.createElement('p');
+      desc.className = 'cap-desc';
+      desc.textContent = cap.desc;
+      card.appendChild(desc);
+
+      cap.levels.forEach((text, idx)=>{
+        const lv = document.createElement('div');
+        lv.className = 'level';
+        lv.id = 'level-'+cap.id+'-'+idx;
+
+        const label = document.createElement('div');
+        label.className = 'level-label';
+        label.innerHTML = '<span class="level-dot" style="background:'+DEPTHS[idx].color+'"></span>'+DEPTHS[idx].label;
+        lv.appendChild(label);
+
+        const txt = document.createElement('div');
+        txt.className = 'level-text';
+        txt.textContent = text;
+        lv.appendChild(txt);
+
+        const ynRow = document.createElement('div');
+        ynRow.className = 'yn-row';
+        const yesBtn = document.createElement('button');
+        yesBtn.className = 'yn-btn'; yesBtn.textContent = 'Yes'; yesBtn.type='button';
+        const noBtn = document.createElement('button');
+        noBtn.className = 'yn-btn'; noBtn.textContent = 'No'; noBtn.type='button';
+        yesBtn.addEventListener('click', ()=> setAnswer(cap.id, idx, true));
+        noBtn.addEventListener('click', ()=> setAnswer(cap.id, idx, false));
+        ynRow.appendChild(yesBtn); ynRow.appendChild(noBtn);
+        lv.appendChild(ynRow);
+
+        const lockNote = document.createElement('div');
+        lockNote.className = 'lock-note';
+        lockNote.id = 'lock-'+cap.id+'-'+idx;
+        if (idx>0) lv.appendChild(lockNote);
+
+        const whyWrap = document.createElement('div');
+        whyWrap.className = 'why-wrap';
+        whyWrap.id = 'why-'+cap.id+'-'+idx;
+        whyWrap.hidden = true;
+        const whyInput = document.createElement('input');
+        whyInput.type = 'text';
+        whyInput.maxLength = 240;
+        whyInput.placeholder = 'Why? (a line on what makes this true or not, for you)';
+        whyInput.addEventListener('input', (e)=>{
+          const a = state.answers[cap.id][idx];
+          if (a){ a.why = e.target.value; saveDraft(); }
+        });
+        whyWrap.appendChild(whyInput);
+        lv.appendChild(whyWrap);
+
+        card.appendChild(lv);
+      });
+      wrap.appendChild(card);
+    });
+  });
+  refreshAllUI();
+}
+
+function setAnswer(capId, levelIdx, yes){
+  if (!isUnlocked(capId, levelIdx)) return;
+  const existing = state.answers[capId][levelIdx];
+  state.answers[capId][levelIdx] = { yes, why: existing ? existing.why||'' : '' };
+  for (let i=levelIdx+1;i<4;i++){ if (!isUnlocked(capId, i)) state.answers[capId][i] = null; }
+  saveDraft();
+  refreshAllUI();
+}
+
+function refreshAllUI(){
+  CAPACITIES.forEach(cap=>{
+    const depthIdx = currentDepthIndex(cap.id);
+    const badge = document.getElementById('badge-'+cap.id);
+    badge.textContent = depthLabelFor(depthIdx);
+    badge.style.background = depthIdx<0 ? 'var(--track)' : depthColorFor(depthIdx);
+    badge.style.color = depthIdx<0 ? 'var(--ink-muted)' : '#fff';
+
+    cap.levels.forEach((_, idx)=>{
+      const lv = document.getElementById('level-'+cap.id+'-'+idx);
+      const unlocked = isUnlocked(cap.id, idx);
+      const ans = state.answers[cap.id][idx];
+      const yesBtn = lv.querySelector('.yn-row .yn-btn:nth-child(1)');
+      const noBtn = lv.querySelector('.yn-row .yn-btn:nth-child(2)');
+      lv.classList.toggle('locked', !unlocked);
+      yesBtn.disabled = !unlocked;
+      noBtn.disabled = !unlocked;
+      yesBtn.classList.toggle('selected-yes', !!(ans && ans.yes===true));
+      noBtn.classList.toggle('selected-no', !!(ans && ans.yes===false));
+
+      const lockNote = document.getElementById('lock-'+cap.id+'-'+idx);
+      if (lockNote) lockNote.textContent = unlocked ? '' : ('Answer ' + DEPTHS[idx-1].label + ' first.');
+
+      const whyWrap = document.getElementById('why-'+cap.id+'-'+idx);
+      const show = unlocked && ans !== null;
+      whyWrap.hidden = !show;
+      if (show){
+        const input = whyWrap.querySelector('input');
+        if (document.activeElement !== input) input.value = ans.why || '';
+      }
+    });
+  });
+  renderSwimList();
+}
+
+function renderSwimList(){
+  const wrap = document.getElementById('swimList');
+  wrap.innerHTML = '';
+  let sum = 0, n = 0;
+  CAPACITIES.forEach(cap=>{
+    const idx = currentDepthIndex(cap.id);
+    if (idx>=0){ sum += idx; n++; }
+    const row = document.createElement('div');
+    row.className = 'swim-row';
+    const name = document.createElement('div');
+    name.className = 'swim-name';
+    name.textContent = cap.name;
+    const track = document.createElement('div');
+    track.className = 'swim-track';
+    track.style.flex = '1';
+    for (let i=0;i<4;i++){
+      const seg = document.createElement('div');
+      seg.className = 'swim-seg' + (i<=idx ? ' on' : '');
+      if (i<=idx) seg.style.setProperty('--seg-color', depthColorFor(idx));
+      track.appendChild(seg);
+    }
+    const cur = document.createElement('div');
+    cur.className = 'swim-current';
+    cur.textContent = depthLabelFor(idx);
+    row.appendChild(name); row.appendChild(track); row.appendChild(cur);
+    wrap.appendChild(row);
+  });
+  const overallIdx = n>0 ? Math.round(sum/n) : -1;
+  document.getElementById('overallLabel').textContent = n>0 ? depthLabelFor(overallIdx) : '—';
+}
+
+function collectSnapshot(){
+  const depths = {};
+  CAPACITIES.forEach(cap=>{
+    const idx = currentDepthIndex(cap.id);
+    depths[cap.id] = idx>=0 ? DEPTHS[idx].id : null;
+  });
+  return depths;
+}
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+
+document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  if (!confirm('Clear all your answers? This cannot be undone.')) return;
+  CAPACITIES.forEach(c => { state.answers[c.id] = [null,null,null,null]; });
+  saveDraft();
+  refreshAllUI();
+});
+
+document.getElementById('fName').addEventListener('input', e=>{ state.name = e.target.value; saveDraft(); });
+document.getElementById('fTeam').addEventListener('input', e=>{ state.team = e.target.value; saveDraft(); });
+document.getElementById('fDate').addEventListener('input', e=>{ state.date = e.target.value; saveDraft(); });
+
+function timeAgo(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const s = Math.max(0, Math.round((Date.now()-d.getTime())/1000));
+  if (s<60) return 'just now';
+  if (s<3600) return Math.floor(s/60)+'m ago';
+  if (s<86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function buildGroupLegend(){
+  const el = document.getElementById('groupLegend');
+  el.innerHTML = DEPTHS.map(d=>
+    '<div class="legend-card" style="min-width:120px; flex:none;"><span class="legend-swatch" style="background:'+d.color+'"></span><span class="legend-title">'+d.label+'</span></div>'
+  ).join('');
+}
+buildGroupLegend();
+
+function renderGroup(docs){
+  const total = docs.length;
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('countBadge').textContent = total;
+
+  const counts = {}; CAPACITIES.forEach(c=> counts[c.id] = {sp:0,ll:0,oo:0,cd:0,none:0});
+  let overallSum = 0, overallN = 0;
+  const people = [];
+  docs.forEach(snap=>{
+    const data = snap.data() || {};
+    const depths = data.depths || {};
+    let personSum = 0, personN = 0;
+    CAPACITIES.forEach(cap=>{
+      const d = depths[cap.id];
+      if (d && counts[cap.id][d] !== undefined){ counts[cap.id][d]++; }
+      else counts[cap.id].none++;
+      const dIdx = DEPTHS.findIndex(x=>x.id===d);
+      if (dIdx>=0){ overallSum += dIdx; overallN++; personSum += dIdx; personN++; }
+    });
+    people.push({
+      name: data.name, team: data.team,
+      overallIdx: personN>0 ? Math.round(personSum/personN) : -1,
+      submittedAt: data.submittedAt
+    });
+  });
+
+  document.getElementById('collectiveLabel').textContent = overallN>0 ? depthLabelFor(Math.round(overallSum/overallN)) : '—';
+
+  const stacksEl = document.getElementById('capStacks');
+  stacksEl.innerHTML = '';
+  if (total===0){
+    stacksEl.innerHTML = '<div class="empty-note">No one has shared results yet — this fills in as people submit.</div>';
+  } else {
+    CAPACITIES.forEach(cap=>{
+      const c = counts[cap.id];
+      const card = document.createElement('div');
+      card.className = 'stack-card';
+      const top = document.createElement('div');
+      top.className = 'stack-top';
+      top.innerHTML = '<span>'+cap.code+'. '+cap.name+'</span><span class="n">'+(total-c.none)+' / '+total+' reached the pool</span>';
+      card.appendChild(top);
+      const bar = document.createElement('div');
+      bar.className = 'stack-bar';
+      DEPTHS.forEach(d=>{
+        const n = c[d.id];
+        if (n>0){
+          const seg = document.createElement('div');
+          seg.className = 'stack-seg';
+          seg.style.width = (n/total*100)+'%';
+          seg.style.background = d.color;
+          seg.title = d.label+': '+n;
+          bar.appendChild(seg);
+        }
+      });
+      card.appendChild(bar);
+      stacksEl.appendChild(card);
+    });
+  }
+
+  const peopleEl = document.getElementById('peopleList');
+  peopleEl.innerHTML = '';
+  if (!people.length){
+    peopleEl.innerHTML = '<div class="empty-note">Nobody has shared yet.</div>';
+  } else {
+    people.sort((a,b)=> new Date(b.submittedAt||0) - new Date(a.submittedAt||0));
+    people.forEach(p=>{
+      const row = document.createElement('div');
+      row.className = 'person-card';
+      const who = escapeHtml(p.name || 'Anonymous') + (p.team ? ' <span class="person-team">· '+escapeHtml(p.team)+'</span>' : '');
+      const depthBadge = '<span class="person-depth" style="background:'+depthColorFor(p.overallIdx)+'; color:'+(p.overallIdx<0?'var(--ink-muted)':'#fff')+'">'+depthLabelFor(p.overallIdx)+'</span>';
+      row.innerHTML = '<span class="person-who">'+who+'</span><span style="display:flex; align-items:center; gap:10px;">'+depthBadge+'<span class="section-note" style="margin:0;">'+timeAgo(p.submittedAt)+'</span></span>';
+      peopleEl.appendChild(row);
+    });
+  }
+}
+
+function scriptUrlConfigured(){
+  return SCRIPT_URL && SCRIPT_URL.indexOf('PASTE_YOUR') === -1;
+}
+
+async function fetchGroupResults(){
+  if (!scriptUrlConfigured()){
+    const banner = document.getElementById('dbBanner');
+    banner.hidden = false; banner.classList.add('error');
+    banner.textContent = "Group results aren't connected yet — an admin needs to add the Apps Script URL in the page code.";
+    document.getElementById('submitGroupBtn').disabled = true;
+    renderGroup([]);
+    return;
+  }
+  try{
+    const res = await fetch(SCRIPT_URL, { method:'GET' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const records = await res.json();
+    const docs = records.map(r => ({ data: () => r }));
+    renderGroup(docs);
+    const banner = document.getElementById('dbBanner');
+    banner.hidden = true; banner.classList.remove('error');
+    document.getElementById('submitGroupBtn').disabled = false;
+  }catch(err){
+    const banner = document.getElementById('dbBanner');
+    banner.hidden = false; banner.classList.add('error');
+    banner.textContent = 'Group results hit a snag. Try reopening this page.';
+  }
+}
+
+fetchGroupResults();
+setInterval(fetchGroupResults, 20000);
+document.querySelector('.tab[data-tab="group"]').addEventListener('click', fetchGroupResults);
+
+document.getElementById('submitGroupBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('submitMsg');
+  if (!scriptUrlConfigured()){ msg.textContent = "Can't share right now — group results aren't connected."; return; }
+  const depths = collectSnapshot();
+  const anyAnswered = Object.values(depths).some(v=>v!==null);
+  if (!anyAnswered){ msg.textContent = 'Answer at least one capacity before sharing.'; return; }
+  const btn = document.getElementById('submitGroupBtn');
+  btn.disabled = true; btn.textContent = 'Sharing…';
+  try{
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        participantId: getParticipantId(),
+        name: state.name || null,
+        team: state.team || null,
+        date: state.date || null,
+        depths,
+        submittedAt: new Date().toISOString()
+      })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    msg.textContent = 'Shared — you can update this anytime by tapping again.';
+    fetchGroupResults();
+  }catch(err){
+    msg.textContent = 'Sharing failed. Please try again.';
+  }
+  btn.disabled = false; btn.textContent = 'Share to group results';
+});
+
+loadDraft();
+document.getElementById('fName').value = state.name || '';
+document.getElementById('fTeam').value = state.team || '';
+document.getElementById('fDate').value = state.date || '';
+renderCapacities();
+renderGroup([]);
+</script>
+
+</body>
+</html>
